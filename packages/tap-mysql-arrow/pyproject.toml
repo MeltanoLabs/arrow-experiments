@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tap-mysql-arrow"
+version = "0.1.0"
+description = "Singer tap for MySQL/MariaDB emitting Arrow BATCH messages via ADBC"
+requires-python = ">=3.10"
+# adbc-driver-mysql is only on conda-forge, not PyPI.
+# Install it separately before using this package:
+#   conda install -c conda-forge adbc-driver-mysql
+# or download a wheel from https://github.com/apache/arrow-adbc/releases
+dependencies = [
+    "adbc-driver-manager>=0.11",
+    "pyarrow>=17",
+    "sshtunnel>=0.4",
+    "cryptography>=40",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+tap-mysql = "tap_mysql_arrow.tap:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tap_mysql_arrow"]

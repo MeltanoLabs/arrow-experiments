@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mapper-fivetran-arrow"
+version = "0.1.0"
+description = "Singer mapper applying Fivetran-style transforms on Arrow BATCH messages"
+requires-python = ">=3.10"
+dependencies = [
+    "singer-sdk~=0.55.0a1",
+    "pyarrow>=17",
+    "pyhumps>=3.8.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "singer-sdk[testing]"]
+
+[project.scripts]
+mapper-fivetran = "mapper_fivetran_arrow.mapper:FivetranArrowMapper.cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mapper_fivetran_arrow"]

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "target-snowflake-arrow"
+version = "0.1.0"
+description = "Singer target loading Arrow BATCH messages into Snowflake via ADBC"
+requires-python = ">=3.10"
+dependencies = [
+    "singer-sdk~=0.55.0a1",
+    "adbc-driver-manager>=0.11",
+    "pyarrow>=17",
+    "cryptography>=40",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "singer-sdk[testing]"]
+
+[project.scripts]
+target-snowflake = "target_snowflake_arrow.target:TargetSnowflakeArrow.cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["target_snowflake_arrow"]

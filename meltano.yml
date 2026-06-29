@@ -1,0 +1,133 @@
+default_environment: dev
+project_id: 019f1546-243e-7615-9692-b44d0574d668
+environments:
+- name: dev
+- name: staging
+- name: prod
+send_anonymous_usage_stats: false
+plugins:
+  extractors:
+  - name: tap-mysql
+    namespace: tap_mysql
+    pip_url: -e packages/tap-mysql-arrow
+    executable: tap-mysql
+    capabilities:
+    - catalog
+    - discover
+    - state
+    - structured-logging
+    settings:
+    - name: host
+      kind: string
+      label: Host
+    - name: port
+      kind: integer
+      value: 3306
+      label: Port
+    - name: user
+      kind: string
+      label: User
+    - name: password
+      kind: password
+      label: Password
+    - name: database
+      kind: string
+      label: Database
+    - name: filter_dbs
+      kind: string
+      label: Filter DBs
+      description: Comma-separated list of databases to sync
+    - name: ssl_ca
+      kind: string
+      label: SSL CA
+    - name: ssl_cert
+      kind: string
+      label: SSL Certificate
+    - name: ssl_key
+      kind: string
+      label: SSL Key
+    - name: ssh_host
+      kind: string
+      label: SSH Host
+    - name: ssh_port
+      kind: integer
+      value: 22
+      label: SSH Port
+    - name: ssh_username
+      kind: string
+      label: SSH Username
+    - name: ssh_private_key
+      kind: string
+      label: SSH Private Key Path
+    - name: ssh_private_key_password
+      kind: password
+      label: SSH Private Key Password
+    - name: ssh_password
+      kind: password
+      label: SSH Password
+    - name: batch_size
+      kind: integer
+      value: 500000
+      label: Batch Size
+    - name: batch_root_dir
+      kind: string
+      label: Batch Root Dir
+    - name: session_sqls
+      kind: array
+      label: Session SQLs
+  mappers:
+  - name: mapper-fivetran
+    namespace: mapper_fivetran
+    pip_url: -e packages/mapper-fivetran-arrow
+    executable: mapper-fivetran
+    capabilities:
+    - structured-logging
+    settings:
+    - name: batch_root_dir
+      kind: string
+      label: Batch Root Dir
+    mappings:
+    - name: fivetran
+  loaders:
+  - name: target-snowflake
+    namespace: target_snowflake
+    pip_url: -e packages/target-snowflake-arrow
+    executable: target-snowflake
+    settings:
+    - name: user
+      kind: string
+      label: User
+    - name: account
+      kind: string
+      label: Account
+      description: Snowflake account identifier (e.g. xy12345.us-east-1)
+    - name: database
+      kind: string
+      label: Database
+    - name: schema
+      kind: string
+      value: PUBLIC
+      label: Schema
+    - name: warehouse
+      kind: string
+      label: Warehouse
+    - name: role
+      kind: string
+      label: Role
+    - name: password
+      kind: password
+      label: Password
+    - name: private_key
+      kind: password
+      label: Private Key
+      description: Inline PEM private key (JWT auth)
+    - name: private_key_path
+      kind: string
+      label: Private Key Path
+    - name: private_key_passphrase
+      kind: password
+      label: Private Key Passphrase
+    - name: use_browser_authentication
+      kind: boolean
+      value: false
+      label: Use Browser Authentication

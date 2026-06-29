@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any, Sequence
 
 import pyarrow as pa
@@ -96,6 +97,7 @@ class SnowflakeArrowSink(Sink):
             file_path = file_uri.removeprefix("file://")
             with ipc.open_file(file_path) as reader:
                 table: pa.Table = reader.read_all()
+            os.remove(file_path)
 
             if table.num_rows == 0:
                 continue

@@ -217,6 +217,7 @@ class FivetranArrowMapper(InlineMapper):
             src_path = file_uri.removeprefix("file://")
             with ipc.open_file(src_path) as reader:
                 table = reader.read_all()
+            os.remove(src_path)
 
             transformed = _transform_table(table, needs_id)
 

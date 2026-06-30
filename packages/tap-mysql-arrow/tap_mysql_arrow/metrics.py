@@ -37,8 +37,7 @@ class MetricEmitter:
             count = self._count
             self._count = 0
         msg = {
-            "type": "METRIC",
-            "metric_type": "counter",
+            "type": "counter",
             "metric": "record_count",
             "value": count,
             "tags": {"stream": self._stream, "table": self._table},

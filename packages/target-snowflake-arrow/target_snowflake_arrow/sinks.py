@@ -135,8 +135,7 @@ class SnowflakeArrowSink(Sink):
         )
         sys.stderr.write(
             json.dumps({
-                "type": "METRIC",
-                "metric_type": "counter",
+                "type": "counter",
                 "metric": "record_count",
                 "value": table.num_rows,
                 "tags": {"stream": self.stream_name, "table": self._table_name},

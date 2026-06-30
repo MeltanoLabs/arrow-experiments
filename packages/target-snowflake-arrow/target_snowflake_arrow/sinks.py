@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import json
 import os
-import sys
 from typing import Any, Sequence
 
 import pyarrow as pa
 import pyarrow.ipc as ipc
+from singer_sdk import metrics as sdk_metrics
 from singer_sdk.sinks import Sink
 
 
@@ -133,15 +132,15 @@ class SnowflakeArrowSink(Sink):
             self._table_name,
             mode,
         )
-        sys.stderr.write(
-            json.dumps({
-                "type": "counter",
-                "metric": "record_count",
-                "value": table.num_rows,
-                "tags": {"stream": self.stream_name, "table": self._table_name},
-            }) + "\n"
+        sdk_metrics.log(
+            self.logger,
+            sdk_metrics.Point(
+                "counter",
+                sdk_metrics.Metric.RECORD_COUNT,
+                table.num_rows,
+                {"stream": self.stream_name, "table": self._table_name},
+            ),
         )
-        sys.stderr.flush()
 
 
 # ── Snowflake ADBC connection builder ─────────────────────────────────────────

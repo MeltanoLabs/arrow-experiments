@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import os
+import sys
 from typing import Any, Sequence
 
 import pyarrow as pa
@@ -122,6 +124,16 @@ class SnowflakeArrowSink(Sink):
                 self._table_name,
                 mode,
             )
+            sys.stderr.write(
+                json.dumps({
+                    "type": "METRIC",
+                    "metric_type": "counter",
+                    "metric": "record_count",
+                    "value": table.num_rows,
+                    "tags": {"stream": self.stream_name, "table": self._table_name},
+                }) + "\n"
+            )
+            sys.stderr.flush()
 
 
 # ── Snowflake ADBC connection builder ─────────────────────────────────────────

@@ -10,8 +10,9 @@ import threading
 class MetricEmitter:
     """Emits record_count metrics to stderr on a fixed interval."""
 
-    def __init__(self, stream_name: str, interval: float = 60.0) -> None:
+    def __init__(self, stream_name: str, table: str, interval: float = 60.0) -> None:
         self._stream = stream_name
+        self._table = table
         self._interval = interval
         self._count = 0
         self._lock = threading.Lock()
@@ -40,7 +41,7 @@ class MetricEmitter:
             "metric_type": "counter",
             "metric": "record_count",
             "value": count,
-            "tags": {"stream": self._stream, "endpoint": self._stream},
+            "tags": {"stream": self._stream, "table": self._table},
         }
         sys.stderr.write(json.dumps(msg) + "\n")
         sys.stderr.flush()

@@ -162,7 +162,7 @@ def _sync_stream(
     _write_schema(stream_name, schema, key_properties)
 
     batch_size: int = int(config.get("batch_size", 500_000))
-    metrics = MetricEmitter(stream_name)
+    metrics = MetricEmitter(stream_name, table=f"{db}.{table}" if db else table)
     metrics.start()
 
     file_index = 0

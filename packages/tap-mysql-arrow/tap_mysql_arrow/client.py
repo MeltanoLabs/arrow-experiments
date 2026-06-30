@@ -127,7 +127,7 @@ class _SSHTunnel:
         def _pipe(src: Any, dst: Any) -> None:
             try:
                 while True:
-                    data = src.recv(4096)
+                    data = src.recv(65536)
                     if not data:
                         break
                     dst.send(data)

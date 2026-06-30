@@ -93,8 +93,6 @@ class SnowflakeArrowSink(Sink):
         files: Sequence[str],
     ) -> None:
         """Load each Arrow IPC file from the BATCH manifest into Snowflake."""
-        conn = self._get_connection()
-
         for file_uri in files:
             file_path = file_uri.removeprefix("file://")
             with ipc.open_file(file_path) as reader:
@@ -105,35 +103,46 @@ class SnowflakeArrowSink(Sink):
                 continue
 
             table = _coerce_types(table)
+            self._ingest(table)
 
-            with conn.cursor() as cur:
-                mode = "replace" if not self._initialized else "append"
-                cur.adbc_ingest(
-                    self._table_name,
-                    table,
-                    mode=mode,
-                    db_schema_name=self._schema_name,
-                    catalog_name=self._database_name,
-                )
-                conn.commit()
+    def _ingest(self, table: pa.Table, max_retries: int = 3) -> None:
+        mode = "replace" if not self._initialized else "append"
+        for attempt in range(1, max_retries + 1):
+            try:
+                conn = self._get_connection()
+                with conn.cursor() as cur:
+                    cur.adbc_ingest(
+                        self._table_name,
+                        table,
+                        mode=mode,
+                        db_schema_name=self._schema_name,
+                        catalog_name=self._database_name,
+                    )
+                    conn.commit()
+                break
+            except Exception as exc:
+                self.logger.warning("adbc_ingest attempt %d failed: %s", attempt, exc)
+                self.clean_up()  # drop the connection so _get_connection rebuilds it
+                if attempt == max_retries:
+                    raise
 
-            self._initialized = True
-            self.logger.info(
-                "Loaded %d rows into %s (mode=%s)",
-                table.num_rows,
-                self._table_name,
-                mode,
-            )
-            sys.stderr.write(
-                json.dumps({
-                    "type": "METRIC",
-                    "metric_type": "counter",
-                    "metric": "record_count",
-                    "value": table.num_rows,
-                    "tags": {"stream": self.stream_name, "table": self._table_name},
-                }) + "\n"
-            )
-            sys.stderr.flush()
+        self._initialized = True
+        self.logger.info(
+            "Loaded %d rows into %s (mode=%s)",
+            table.num_rows,
+            self._table_name,
+            mode,
+        )
+        sys.stderr.write(
+            json.dumps({
+                "type": "METRIC",
+                "metric_type": "counter",
+                "metric": "record_count",
+                "value": table.num_rows,
+                "tags": {"stream": self.stream_name, "table": self._table_name},
+            }) + "\n"
+        )
+        sys.stderr.flush()
 
 
 # ── Snowflake ADBC connection builder ─────────────────────────────────────────

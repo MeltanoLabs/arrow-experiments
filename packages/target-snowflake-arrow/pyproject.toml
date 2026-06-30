@@ -18,7 +18,7 @@ dependencies = [
 dev = ["pytest>=8", "singer-sdk[testing]"]
 
 [project.scripts]
-target-snowflake = "target_snowflake_arrow.target:TargetSnowflakeArrow.cli"
+target-snowflake-arrow = "target_snowflake_arrow.target:TargetSnowflakeArrow.cli"
 
 [tool.hatch.build.targets.wheel]
 packages = ["target_snowflake_arrow"]

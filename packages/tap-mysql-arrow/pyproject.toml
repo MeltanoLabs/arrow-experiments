@@ -22,7 +22,7 @@ dependencies = [
 dev = ["pytest>=8"]
 
 [project.scripts]
-tap-mysql = "tap_mysql_arrow.tap:cli"
+tap-mysql-arrow = "tap_mysql_arrow.tap:cli"
 
 [tool.hatch.build.targets.wheel]
 packages = ["tap_mysql_arrow"]

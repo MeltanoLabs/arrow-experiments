@@ -17,7 +17,7 @@ dependencies = [
 dev = ["pytest>=8", "singer-sdk[testing]"]
 
 [project.scripts]
-mapper-fivetran = "mapper_fivetran_arrow.mapper:FivetranArrowMapper.cli"
+mapper-fivetran-arrow = "mapper_fivetran_arrow.mapper:FivetranArrowMapper.cli"
 
 [tool.hatch.build.targets.wheel]
 packages = ["mapper_fivetran_arrow"]

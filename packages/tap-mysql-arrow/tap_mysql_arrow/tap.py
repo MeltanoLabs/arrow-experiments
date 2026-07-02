@@ -126,6 +126,17 @@ CONFIG_SCHEMA: dict = {
 # ── Sync logic ───────────────────────────────────────────────────────────────
 
 
+# MySQL allows storing these invalid zero-dates, but the ADBC driver's Go time
+# parser rejects them outright (e.g. "month out of range"), crashing the sync.
+# NULLIF-ing them out in SQL turns them into NULL before they reach the driver.
+def _select_columns(schema: dict) -> list[str]:
+    return [
+        f"NULLIF(NULLIF(`{c}`, '0000-00-00'), '0000-00-00 00:00:00') AS `{c}`"
+        if spec.get("format") in ("date", "date-time") else f"`{c}`"
+        for c, spec in schema.get("properties", {}).items()
+    ]
+
+
 def _run_session_sqls(conn, config: dict[str, Any]) -> None:
     defaults = [
         "SET @@session.time_zone='+0:00'",
@@ -182,8 +193,9 @@ def _sync_stream(
         current_batches = []
         current_rows = 0
 
+    columns = _select_columns(schema)
     try:
-        with stream_batches(config, db, table) as reader:
+        with stream_batches(config, db, table, columns) as reader:
             for batch in reader:
                 if batch.num_rows == 0:
                     continue

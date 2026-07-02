@@ -210,18 +210,23 @@ def connect(config: dict[str, Any]):
 
 
 @contextlib.contextmanager
-def stream_batches(config: dict[str, Any], db_name: str, table: str):
+def stream_batches(config: dict[str, Any], db_name: str, table: str, columns: list[str] | None = None):
     """Yield a streaming Arrow RecordBatchReader for a table.
 
     Uses cursor.fetch_record_batch() so MySQL streams record batches to the
     caller as they arrive, avoiding loading the whole table into memory first.
+
+    `columns`, if given, is a list of pre-built SQL column expressions (e.g.
+    to substitute NULL for MySQL's invalid zero-dates before they reach the
+    ADBC driver); otherwise all columns are selected.
     """
     with _tunnel_and_kwargs(config) as db_kwargs:
         conn = adbc_dbapi.connect(driver="mysql", db_kwargs=db_kwargs)
         try:
             with conn.cursor() as cur:
                 qualified = f"`{db_name}`.`{table}`" if db_name else f"`{table}`"
-                cur.execute(f"SELECT * FROM {qualified}")
+                cols_sql = ", ".join(columns) if columns else "*"
+                cur.execute(f"SELECT {cols_sql} FROM {qualified}")
                 yield cur.fetch_record_batch()
         finally:
             conn.close()

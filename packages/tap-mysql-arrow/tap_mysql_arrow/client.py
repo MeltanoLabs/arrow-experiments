@@ -209,6 +209,22 @@ def connect(config: dict[str, Any]):
             conn.close()
 
 
+def fetch_log_position(config: dict[str, Any]) -> tuple[str, int] | None:
+    """Return the server's current binlog (file, position), or None if binary logging is disabled.
+
+    Tries the MySQL 8.4+ syntax first, falling back to the older/MariaDB syntax.
+    """
+    with connect(config) as conn, conn.cursor() as cur:
+        try:
+            cur.execute("SHOW BINARY LOG STATUS")
+        except Exception:
+            cur.execute("SHOW MASTER STATUS")
+        row = cur.fetchone()
+        if row is None:
+            return None
+        return row[0], row[1]
+
+
 @contextlib.contextmanager
 def stream_batches(config: dict[str, Any], db_name: str, table: str):
     """Yield a streaming Arrow RecordBatchReader for a table.

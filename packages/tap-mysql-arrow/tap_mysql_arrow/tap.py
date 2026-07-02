@@ -12,7 +12,7 @@ from typing import Any
 import pyarrow as pa
 import pyarrow.ipc as ipc
 
-from tap_mysql_arrow.client import connect, stream_batches
+from tap_mysql_arrow.client import connect, fetch_log_position, stream_batches
 from tap_mysql_arrow.discovery import discover_catalog
 from tap_mysql_arrow.metrics import MetricEmitter
 
@@ -182,6 +182,7 @@ def _sync_stream(
         current_batches = []
         current_rows = 0
 
+    log_position = fetch_log_position(config)
     try:
         with stream_batches(config, db, table) as reader:
             for batch in reader:
@@ -200,10 +201,13 @@ def _sync_stream(
     finally:
         metrics.stop()
 
-    state.setdefault("bookmarks", {})[stream_name] = {
+    bookmark = {
         "replication_method": "FULL_TABLE",
         "initial_full_table_complete": True,
     }
+    if log_position is not None:
+        bookmark["log_file"], bookmark["log_pos"] = log_position
+    state.setdefault("bookmarks", {})[stream_name] = bookmark
 
 
 def sync(config: dict[str, Any], catalog: dict, state: dict) -> None:

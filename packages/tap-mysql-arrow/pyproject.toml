@@ -15,7 +15,7 @@ dependencies = [
     "adbc-driver-manager>=0.11",
     "pyarrow>=17",
     "paramiko>=5",
-    "cryptography>=40",
+    "cryptography>=50.0.0",
 ]
 
 [project.optional-dependencies]
